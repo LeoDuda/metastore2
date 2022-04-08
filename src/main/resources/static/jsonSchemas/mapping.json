@@ -1,0 +1,10 @@
+{
+    "_comment": "This file maps xml schemas to their json schemas",
+    "id_1": [
+        {"v1": "api/v1/schemas/id_3?version=1"},
+        {"v2": "api/v1/schemas/id_3?version=1"}
+    ],
+    "xsd_id2": [
+        {"v1": "Pfad/zu/v1"}
+    ]
+}
