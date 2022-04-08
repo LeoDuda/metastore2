@@ -81,6 +81,8 @@
     <script type="text/javascript" src="/editor/dependencies/tabulator/js/tabulator.min.js"></script>
     <script type="text/javascript" src="/editor/lib/js/metadataeditor.js"></script>
 
+    <script src="../static/editor/dependencies/xml-js.js"></script>
+
     <script th:inline="javascript">
       /* Alternative code instead of keycloak. */
       var options;
@@ -161,20 +163,50 @@
               var url = resource.schema.identifier;
               readSchema(url, function (schema) {
                 readMetadataDocument(options.resource.metadataDocumentUri, function (metadata) {
-                  try {
-                    JSON.parse(JSON.stringify(metadata));
+                  var version = resource.schemaVersion;
+                  console.log("metadata ist: \n");
+                  console.log(metadata);
+
+
+                  //check if metadata is a json file
+                  if ((isJson(metadata) === 1)) {
+                    console.log("im json part");
                     options = {operation: "READ", dataModel: schema, uiForm: "*", resource: JSON.parse(metadata)};
                     $('form').metadataeditorForm(options, function onSubmitValid(value) {
                     });
-                  } catch (e) {
-                    $.getJSON("/jsonSchemas/xmlDocumentViewerWrapper.json", function (dataModel) {
-                      $.getJSON("/jsonSchemas/uiFormXmlDocumentViewerWrapper.json", function (uiForm) {
-                        var resource = {metadata: metadata};
-                        options = {operation: "READ", dataModel: dataModel, uiForm: uiForm, resource: resource};
-                        $('form').metadataeditorForm(options, function onSubmitValid(value) {
+                  }
+                  else {
+                    try {
+                      console.log("im try xml");
+                      var json = convert.xml2json(metadata, { compact: true, spaces: 4 });
+                      console.log(json);
+
+
+                      $.getJSON( "/jsonSchemas/mapping.json", function( mapping ) {
+                        console.log(mapping);
+
+                        var schemaReference = mapping[schemaId][version - 1]['v' + version];
+                        
+
+
+                        $.getJSON(schemaReference, function( mappedSchema ) {
+                          options = {operation: "READ", dataModel: mappedSchema, uiForm: "*", resource: json};
+                          $('form').metadataeditorForm(options, function onSubmitValid(value) {
+                          });
+                        });                    
+                      });
+                    }
+                    catch (e) {
+                      console.log("im catch xml");
+                      $.getJSON("/jsonSchemas/xmlDocumentViewerWrapper.json", function (dataModel) {
+                        $.getJSON("/jsonSchemas/uiFormXmlDocumentViewerWrapper.json", function (uiForm) {
+                          var resource = {metadata: metadata};
+                          options = {operation: "READ", dataModel: dataModel, uiForm: uiForm, resource: resource};
+                          $('form').metadataeditorForm(options, function onSubmitValid(value) {
+                          });
                         });
                       });
-                    });
+                    }
                   }
                 });
               });
@@ -496,6 +528,15 @@
             callback(result.status);
           }
         });
+      }
+
+      function isJson (object) {
+        try {
+          JSON.parse(object);
+          return 1;
+        } catch(e) {
+          return 0;
+        }
       }
     </script>
 
