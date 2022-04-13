@@ -338,28 +338,12 @@
 
                           $.getJSON(schemaReference, function (mappedSchema) {
                             if (documentAsText !== null) {
-
-                              console.log("todo:");
-                              options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(documentAsText), buttonTitle: "Register Metadata Document" };
-
-
-
-
-                              var resource = { metadata: documentAsText };
-                              options = { operation: "UPDATE", dataModel: dataModel, uiForm: uiForm, resource: resource, buttonTitle: "Register Metadata Document" };
-
-                            } else {
                               try {
-                                //Hier falls xsd aber ohne hochgeladene XML-Ressource
+                                console.log("im try");
+                                var tempJson = convert.xml2json(documentAsText, { compact: true, spaces: 4 });
+                                console.log(tempJson);
+                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: tempJson, buttonTitle: "Register Metadata Document" };
 
-                                console.log("im trY");
-                                console.log(schemaDocument);
-
-
-                                console.log(mappedSchema);
-
-                                options = { operation: "CREATE", dataModel: mappedSchema, uiForm: "*", buttonTitle: "Register Metadata Document" };
-                                
                                 $('form').metadataeditorForm(options, function onSubmitValid(metadata) {
                                   //create a JSON file, which contains the metadata.
 
@@ -367,7 +351,7 @@
                                   console.log(JSON.parse(metadata));
 
 
-                                  
+
                                   var xml = convert.json2xml(JSON.parse(metadata), { compact: true, spaces: 4 });
 
                                   console.log(xml);
@@ -378,7 +362,6 @@
                                   const documentFile = new File([blobDocument], 'documentFile.xml');
                                   console.log(metadataRecord);
                                   createMetadataRecord(metadataRecord, documentFile);
-
                                 });
                               } catch (e) {
                                 $.getJSON("/jsonSchemas/xmlDocumentViewerWrapper.json", function (dataModel) {
@@ -398,6 +381,34 @@
                                   });
                                 });
                               }
+                            } else {
+                              //Hier falls xsd aber ohne hochgeladene XML-Ressource
+
+                              console.log("im trY");
+                              console.log(schemaDocument);
+
+
+                              console.log(mappedSchema);
+
+                              options = { operation: "CREATE", dataModel: mappedSchema, uiForm: "*", buttonTitle: "Register Metadata Document" };
+
+                              $('form').metadataeditorForm(options, function onSubmitValid(metadata) {
+                                //create a JSON file, which contains the metadata.
+
+                                console.log(metadata);
+                                console.log(JSON.parse(metadata));
+
+                                var xml = convert.json2xml(JSON.parse(metadata), { compact: true, spaces: 4 });
+
+                                console.log(xml);
+                                console.log(JSON.parse(metadata).metadata)
+
+                                //var xmlDocument = JSON.parse(metadata).metadata;
+                                var blobDocument = new Blob([xml]);
+                                const documentFile = new File([blobDocument], 'documentFile.xml');
+                                console.log(metadataRecord);
+                                createMetadataRecord(metadataRecord, documentFile);
+                              });
                             }
                           });
                         });
