@@ -124,6 +124,7 @@
       var currentUrl = window.location.href;
       var url = new URL(currentUrl);
       var schemaId = url.searchParams.get("id");
+      var mappingPath = "/jsonSchemas/mappings/mapping.json";
 
       //add schema identifier to the table url
       if (schemaId !== null) {
@@ -179,12 +180,12 @@
                 }
                 else {
                   try {
-                    console.log("im try xml");
+                    console.log("im try xml Zeile 183");
                     var json = convert.xml2json(metadata, { compact: true, spaces: 4 });
                     console.log(json);
 
 
-                    $.getJSON("/jsonSchemas/mapping.json", function (mapping) {
+                    $.getJSON(mappingPath, function (mapping) {
                       console.log(mapping);
 
                       var schemaReference = mapping[schemaId][version - 1]['v' + version];
@@ -192,14 +193,15 @@
 
 
                       $.getJSON(schemaReference, function (mappedSchema) {
-                        options = { operation: "READ", dataModel: mappedSchema, uiForm: "*", resource: json };
+                        console.log(JSON.stringify(mappedSchema, null, 2));
+                        options = { operation: "READ", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(json) };
                         $('form').metadataeditorForm(options, function onSubmitValid(value) {
                         });
                       });
                     });
                   }
                   catch (e) {
-                    console.log("im catch xml");
+                    console.log("im catch xml Zeile 204");
                     $.getJSON("/jsonSchemas/xmlDocumentViewerWrapper.json", function (dataModel) {
                       $.getJSON("/jsonSchemas/uiFormXmlDocumentViewerWrapper.json", function (uiForm) {
                         var resource = { metadata: metadata };
@@ -231,7 +233,7 @@
                       console.log(rowColumnvalue.schemaVersion);
 
                       if ((isJson(metadataDataModel) === 1)) {
-                        console.log("im json part");
+                        console.log("im json part Zeile 236");
                         var resource = JSON.parse(metadataResource);
 
                         if (documentAsText !== null) {
@@ -261,8 +263,8 @@
                         });
                       } else {
 
-                        console.log("im xml");
-                        $.getJSON("/jsonSchemas/mapping.json", function (mapping) {
+                        console.log("im xml Zeile 266");
+                        $.getJSON(mappingPath, function (mapping) {
                           console.log(mapping);
                           var version = rowColumnvalue.schemaVersion;
                           console.log(version);
@@ -273,71 +275,79 @@
                           $.getJSON(schemaReference, function (mappedSchema) {
                             if (documentAsText !== null) {
                               try {
-                                console.log("im try1");
+                                console.log("im try Zeile 278");
                                 var tempJson = convert.xml2json(documentAsText, { compact: true, spaces: 4 });
-                                console.log(resource);
-                                console.log(JSON.parse(resource));
-                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: tempJson, buttonTitle: "Update" };
+                                console.log(tempJson);
+                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(tempJson), buttonTitle: "Update" };
+
+                              } catch (e) {
+                                var oldJson = convert.xml2json(metadataResource, { compact: true, spaces: 4 });
+                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(oldJson), buttonTitle: "Update" };
+                              }
+                            }
+                            else {
+                              try {
+                                console.log("im try Zeile 290");
+                                var oldJson = convert.xml2json(metadataResource, { compact: true, spaces: 4 });
+
+
+                                console.log(oldJson);
+                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(oldJson), buttonTitle: "Update" };
+
+
 
                               } catch (e) {
 
-                              }
-                            }
-                            try {
-                              console.log("im try2");
-                              var oldJson = convert.xml2json(metadataResource, { compact: true, spaces: 4 });
-
-                              
-                              console.log(oldJson);
-                              options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: oldJson, buttonTitle: "Update" };
-
-
-
-                              $('form').metadataeditorForm(options, function onSubmitValid(updatedMetadataDocument) {
-                                console.log(updatedMetadataDocument);
-
-                                var newJson = convert.xml2json(updatedMetadataDocument, { compact: true, spaces: 4 });
-
-                                //check if the updatedMetdataDocumet and metadataResource are the same
-                                if (_.isEqual(oldJson, newJson)) {
-                                  //the updatedMetdataDocumet and metadataResource are the same
-                                  //update only the record
-
-                                  //updateMetadataRecord(updatedMetadataRecord, null);
-
-                                } else {
-                                  //the updatedMetdataDocumet and metadataResource are not the same
-                                  //update the MD record and the MD document
-                                  var blobDocument = new Blob([newJson]);
-                                  const metadataDocumentFile = new File([blobDocument], 'metadataDocumentFile.xml');
-                                  updateMetadataRecord(updatedMetadataRecord, metadataDocumentFile);
-                                }
-                              });
-                            } catch (e) {
-                              $.getJSON("/jsonSchemas/xmlDocumentViewerWrapper.json", function (dataModel) {
-                                $.getJSON("/jsonSchemas/uiFormXmlDocumentViewerWrapper.json", function (uiForm) {
-                                  var resource = { metadata: metadataResource };
-                                  if (documentAsText !== null) {
-                                    resource = { metadata: documentAsText };
-                                  }
-                                  options = { operation: "UPDATE", dataModel: dataModel, uiForm: uiForm, resource: resource, buttonTitle: "Update" };
-                                  $('form').metadataeditorForm(options, function onSubmitValid(updatedMetadataDocument) {
-                                    var xmlMetadataDocumentAsString = JSON.parse(updatedMetadataDocument).metadata;
-                                    //delete line breaks from the strings
-                                    xmlMetadataDocumentAsString = xmlMetadataDocumentAsString.replace(/\r?\n|\r/g, "");
-                                    metadataResource = metadataResource.replace(/\r?\n|\r/g, "");
-                                    //check if the updatedMetdataDocumet and metadataResource are the same
-                                    if (xmlMetadataDocumentAsString === metadataResource) {
-                                      updateMetadataRecord(updatedMetadataRecord, null);
-                                    } else {
-                                      var blobDocument = new Blob([xmlMetadataDocumentAsString]);
-                                      const metadataDocumentFile = new File([blobDocument], 'metadataDocumentFile.xml');
-                                      updateMetadataRecord(updatedMetadataRecord, metadataDocumentFile);
+                                $.getJSON("/jsonSchemas/xmlDocumentViewerWrapper.json", function (dataModel) {
+                                  $.getJSON("/jsonSchemas/uiFormXmlDocumentViewerWrapper.json", function (uiForm) {
+                                    var resource = { metadata: metadataResource };
+                                    if (documentAsText !== null) {
+                                      resource = { metadata: documentAsText };
                                     }
+                                    options = { operation: "UPDATE", dataModel: dataModel, uiForm: uiForm, resource: resource, buttonTitle: "Update" };
+                                    $('form').metadataeditorForm(options, function onSubmitValid(updatedMetadataDocument) {
+                                      var xmlMetadataDocumentAsString = JSON.parse(updatedMetadataDocument).metadata;
+                                      //delete line breaks from the strings
+                                      xmlMetadataDocumentAsString = xmlMetadataDocumentAsString.replace(/\r?\n|\r/g, "");
+                                      metadataResource = metadataResource.replace(/\r?\n|\r/g, "");
+                                      //check if the updatedMetdataDocumet and metadataResource are the same
+                                      if (xmlMetadataDocumentAsString === metadataResource) {
+                                        updateMetadataRecord(updatedMetadataRecord, null);
+                                      } else {
+                                        var blobDocument = new Blob([xmlMetadataDocumentAsString]);
+                                        const metadataDocumentFile = new File([blobDocument], 'metadataDocumentFile.xml');
+                                        updateMetadataRecord(updatedMetadataRecord, metadataDocumentFile);
+                                      }
+                                    });
                                   });
                                 });
-                              });
+
+                              }
+
                             }
+
+
+                            $('form').metadataeditorForm(options, function onSubmitValid(updatedMetadataDocument) {
+                              console.log(updatedMetadataDocument);
+
+                              var updatedXML = convert.json2xml(JSON.parse(updatedMetadataDocument), { compact: true, spaces: 4 });
+                              console.log(updatedXML);
+
+                              //check if the updatedMetdataDocumet and metadataResource are the same
+                              if (_.isEqual(oldJson, updatedMetadataDocument)) {
+                                //the updatedMetdataDocumet and metadataResource are the same
+                                //update only the record
+
+                                updateMetadataRecord(updatedMetadataRecord, null);
+
+                              } else {
+                                //the updatedMetdataDocumet and metadataResource are not the same
+                                //update the MD record and the MD document
+                                var blobDocument = new Blob([updatedXML]);
+                                const metadataDocumentFile = new File([blobDocument], 'metadataDocumentFile.xml');
+                                updateMetadataRecord(updatedMetadataRecord, metadataDocumentFile);
+                              }
+                            });
                           });
                         });
                       }
@@ -389,6 +399,7 @@
                           options = { operation: "CREATE", dataModel: schemaDocument, uiForm: "*", buttonTitle: "Register Metadata Document" };
                         }
                         $('form').metadataeditorForm(options, function onSubmitValid(metadata) {
+                          console.log(metadata);
                           //create a JSON file, which contains the metadata.
                           var blobSchema = new Blob([JSON.stringify(JSON.parse(metadata))], { type: "application/json" });
                           const metadataDocumentFile = new File([blobSchema], 'metadataDocumentFile.json');
@@ -396,9 +407,9 @@
                         });
                       }
                       else {
-                        console.log("im xml");
-                        $.getJSON("/jsonSchemas/mapping.json", function (mapping) {
-                          console.log(mapping);
+                        console.log("im xml Zeile 403");
+                        $.getJSON(mappingPath, function (mapping) {
+                          console.log(JSON.stringify(mapping, null, 2));
                           var version = record.schemaVersion;
 
                           var schemaReference = mapping[schemaId][version - 1]['v' + version];
@@ -406,10 +417,10 @@
                           $.getJSON(schemaReference, function (mappedSchema) {
                             if (documentAsText !== null) {
                               try {
-                                console.log("im try");
+                                console.log("im try Zeile 413");
                                 var tempJson = convert.xml2json(documentAsText, { compact: true, spaces: 4 });
                                 console.log(tempJson);
-                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: tempJson, buttonTitle: "Register Metadata Document" };
+                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(tempJson), buttonTitle: "Register Metadata Document" };
 
                                 $('form').metadataeditorForm(options, function onSubmitValid(metadata) {
                                   //create a JSON file, which contains the metadata.
@@ -419,12 +430,8 @@
 
 
 
-                                  //var xml = convert.json2xml(JSON.parse(metadata), { compact: true, spaces: 4 });
-                                  xml = `<?xml version='1.0' encoding='utf-8'?>
-<example:metadata xmlns:example="http://www.example.org/schema/xsd/" >
-    <example:title>My first XML document</example:title>
-</example:metadata>
-`;
+                                  var xml = convert.json2xml(JSON.parse(metadata), { compact: true, spaces: 4 });
+
                                   console.log(xml);
                                   console.log(JSON.parse(metadata).metadata)
 
@@ -455,7 +462,7 @@
                             } else {
                               //Hier falls xsd aber ohne hochgeladene XML-Ressource
 
-                              console.log("im trY");
+                              console.log("im try Zeile 458");
                               console.log(schemaDocument);
 
 
@@ -472,9 +479,7 @@
                                 var xml = convert.json2xml(JSON.parse(metadata), { compact: true, spaces: 4 });
 
                                 console.log(xml);
-                                console.log(JSON.parse(metadata).metadata)
 
-                                //var xmlDocument = JSON.parse(metadata).metadata;
                                 var blobDocument = new Blob([xml]);
                                 const documentFile = new File([blobDocument], 'documentFile.xml');
                                 console.log(metadataRecord);
