@@ -1,0 +1,109 @@
+{
+    "$id": "kitxsd.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "This JSON Schema file was generated from kitxsd.xsd on Wed Apr 20 2022 09:28:12 GMT+0200 (Mitteleuropäische Sommerzeit).  For more information please see http://www.xsd2jsonschema.org",
+    "description": "Schema tag attributes: targetNamespace='http://www.example.org/kit' xmlns:kit='http://www.example.org/kit' xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified'",
+    "properties": {
+      "stringtype": {
+        "$ref": "#/definitions/stringtype"
+      },
+      "employeeidtype": {
+        "$ref": "#/definitions/employeeidtype"
+      },
+      "shorttype": {
+        "$ref": "#/definitions/shorttype"
+      },
+      "departmenttype": {
+        "$ref": "#/definitions/departmenttype"
+      },
+      "employeetype": {
+        "$ref": "#/definitions/employeetype"
+      },
+      "employee": {
+        "$ref": "#/definitions/employeetype"
+      }
+    },
+    "type": "object",
+    "anyOf": [
+      {
+        "required": [
+          "stringtype"
+        ]
+      },
+      {
+        "required": [
+          "employeeidtype"
+        ]
+      },
+      {
+        "required": [
+          "shorttype"
+        ]
+      },
+      {
+        "required": [
+          "departmenttype"
+        ]
+      },
+      {
+        "required": [
+          "employeetype"
+        ]
+      },
+      {
+        "required": [
+          "employee"
+        ]
+      }
+    ],
+    "definitions": {
+      "stringtype": {
+        "type": "string"
+      },
+      "employeeidtype": {
+        "pattern": "[a-z]{2}[0-9]{4}",
+        "type": "string"
+      },
+      "shorttype": {
+        "pattern": "[A-Z\\-]{3,8}",
+        "type": "string"
+      },
+      "departmenttype": {
+        "required": [
+          "departmentname",
+          "shortname"
+        ],
+        "properties": {
+          "departmentname": {
+            "$ref": "#/definitions/stringtype"
+          },
+          "shortname": {
+            "$ref": "#/definitions/shorttype"
+          }
+        },
+        "type": "object"
+      },
+      "employeetype": {
+        "required": [
+          "name",
+          "department",
+          "@employeeid"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/definitions/stringtype"
+          },
+          "department": {
+            "$ref": "#/definitions/departmenttype"
+          },
+          "@employeeid": {
+            "$ref": "#/definitions/employeeidtype"
+          }
+        },
+        "type": "object"
+      },
+      "employee": {
+        "$ref": "#/definitions/employeetype"
+      }
+    }
+  }

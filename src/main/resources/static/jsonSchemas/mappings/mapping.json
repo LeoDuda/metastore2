@@ -1,0 +1,24 @@
+{
+    "_comment": "This file maps xml schemas to their json schemas",
+    "id_2": [
+        {
+            "v1": "/jsonSchemas/mappings/kitschema.json"
+        }
+    ],
+    "id_1": [
+        {
+            "v1": "/jsonSchemas/mappings/generatedohne.json"
+        },
+        {
+            "v2": "/jsonSchemas/mappings/generated07.json"
+        },
+        {
+            "v3": "/jsonSchemas/mappings/examplexsd.json"
+        }
+    ],
+    "id_3": [
+        {
+            "v1": "/jsonSchemas/mappings/exampleSchema.json"
+        }
+    ]
+}

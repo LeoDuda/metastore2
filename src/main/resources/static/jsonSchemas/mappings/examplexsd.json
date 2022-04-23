@@ -1,0 +1,18 @@
+{
+  "$id": "examplexsd.json",
+  "title": "This JSON Schema file was generated from examplexsd.xsd on Wed Apr 20 2022 09:28:12 GMT+0200 (Mitteleuropäische Sommerzeit).  For more information please see http://www.xsd2jsonschema.org",
+  "description": "Schema tag attributes: targetNamespace='http://www.example.org/schema/xsd/' xmlns='http://www.example.org/schema/xsd/' xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified' attributeFormDefault='unqualified'",
+  "properties": {
+    "metadata": {
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  }
+}
