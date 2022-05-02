@@ -1,16 +1,15 @@
 {
-    "firstName": {
-      "ui:autofocus": true,
-      "ui:emptyValue": "",
-      "ui:autocomplete": "family-name"
+  "example:metadata": {
+    "_attributes":{
+      "xmlns:example": {
+        "ui:title": "XMLNS",
+        "ui:description": "Namespace des XML"
+      }
     },
-    "lastName": {
-      "ui:emptyValue": "",
-      "ui:autocomplete": "given-name"
-    },
-    "telephone": {
-      "ui:options": {
-        "inputType": "tel"
+    "example:title": {
+      "_text": {
+        "ui:title": "Titel"
       }
     }
   }
+}

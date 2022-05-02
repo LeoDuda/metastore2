@@ -183,18 +183,40 @@
                     console.log("im try xml Zeile 183");
                     var json = convert.xml2json(metadata, { compact: true, spaces: 4 });
                     console.log(json);
+                    var ui;
 
 
                     $.getJSON(mappingPath, function (mapping) {
                       console.log(mapping);
+                      
+
+                      console.log("Zeile 192");
+                      var uiReference = mapping[schemaId][mapping[schemaId].length - 1]['ui'];
+                      console.log(uiReference);
+
+                      try {
+                        $.getJSON(uiReference, function (uiJson) {
+                          console.log(uiJson);
+                          if (uiJson == undefined) {
+                            console.log("undefined");
+                            ui = '*';
+                          } else {
+                            ui = uiJson;
+                          }
+                        });
+                      } catch (e) {
+                        ui = '*'
+                      }
 
                       var schemaReference = mapping[schemaId][version - 1]['v' + version];
 
-
-
                       $.getJSON(schemaReference, function (mappedSchema) {
+                        console.log(ui);
                         console.log(JSON.stringify(mappedSchema, null, 2));
-                        options = { operation: "READ", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(json) };
+                        //Achtung, ui für id_1 passt nicht
+
+
+                        options = { operation: "READ", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(json) };
                         $('form').metadataeditorForm(options, function onSubmitValid(value) {
                         });
                       });
