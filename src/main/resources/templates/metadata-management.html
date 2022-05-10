@@ -188,10 +188,9 @@
 
                     $.getJSON(mappingPath, function (mapping) {
                       console.log(mapping);
-                      
 
                       console.log("Zeile 192");
-                      var uiReference = mapping[schemaId][mapping[schemaId].length - 1]['ui'];
+                      var uiReference = mapping[schemaId]['u' + version];
                       console.log(uiReference);
 
                       try {
@@ -208,7 +207,7 @@
                         ui = '*'
                       }
 
-                      var schemaReference = mapping[schemaId][version - 1]['v' + version];
+                      var schemaReference = mapping[schemaId]['v' + version];
 
                       $.getJSON(schemaReference, function (mappedSchema) {
                         console.log(ui);
@@ -284,6 +283,7 @@
                           createMetadataRecord(metadataRecord, metadataDocumentFile);
                         });
                       } else {
+                        var ui;
 
                         console.log("im xml Zeile 266");
                         $.getJSON(mappingPath, function (mapping) {
@@ -292,7 +292,24 @@
                           console.log(version);
                           console.log(schemaId);
 
-                          var schemaReference = mapping[schemaId][version - 1]['v' + version];
+                          var uiReference = mapping[schemaId]['u' + version];
+                          console.log(uiReference);
+
+                          try {
+                            $.getJSON(uiReference, function (uiJson) {
+                              console.log(uiJson);
+                              if (uiJson == undefined) {
+                                console.log("undefined");
+                                ui = '*';
+                              } else {
+                                ui = uiJson;
+                              }
+                            });
+                          } catch (e) {
+                            ui = '*'
+                          }
+
+                          var schemaReference = mapping[schemaId]['v' + version];
 
                           $.getJSON(schemaReference, function (mappedSchema) {
                             if (documentAsText !== null) {
@@ -300,11 +317,11 @@
                                 console.log("im try Zeile 278");
                                 var tempJson = convert.xml2json(documentAsText, { compact: true, spaces: 4 });
                                 console.log(tempJson);
-                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(tempJson), buttonTitle: "Update" };
+                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(tempJson), buttonTitle: "Update" };
 
                               } catch (e) {
                                 var oldJson = convert.xml2json(metadataResource, { compact: true, spaces: 4 });
-                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(oldJson), buttonTitle: "Update" };
+                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(oldJson), buttonTitle: "Update" };
                               }
                             }
                             else {
@@ -314,7 +331,7 @@
 
 
                                 console.log(oldJson);
-                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(oldJson), buttonTitle: "Update" };
+                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(oldJson), buttonTitle: "Update" };
 
 
 
@@ -429,12 +446,31 @@
                         });
                       }
                       else {
+                        var ui;
+
                         console.log("im xml Zeile 403");
                         $.getJSON(mappingPath, function (mapping) {
                           console.log(JSON.stringify(mapping, null, 2));
                           var version = record.schemaVersion;
 
-                          var schemaReference = mapping[schemaId][version - 1]['v' + version];
+                          var uiReference = mapping[schemaId]['u' + version];
+                          console.log(uiReference);
+
+                          try {
+                            $.getJSON(uiReference, function (uiJson) {
+                              console.log(uiJson);
+                              if (uiJson == undefined) {
+                                console.log("undefined");
+                                ui = '*';
+                              } else {
+                                ui = uiJson;
+                              }
+                            });
+                          } catch (e) {
+                            ui = '*'
+                          }
+
+                          var schemaReference = mapping[schemaId]['v' + version];
 
                           $.getJSON(schemaReference, function (mappedSchema) {
                             if (documentAsText !== null) {
@@ -442,7 +478,7 @@
                                 console.log("im try Zeile 413");
                                 var tempJson = convert.xml2json(documentAsText, { compact: true, spaces: 4 });
                                 console.log(tempJson);
-                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: "*", resource: JSON.parse(tempJson), buttonTitle: "Register Metadata Document" };
+                                options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(tempJson), buttonTitle: "Register Metadata Document" };
 
                                 $('form').metadataeditorForm(options, function onSubmitValid(metadata) {
                                   //create a JSON file, which contains the metadata.
@@ -490,7 +526,7 @@
 
                               console.log(mappedSchema);
 
-                              options = { operation: "CREATE", dataModel: mappedSchema, uiForm: "*", buttonTitle: "Register Metadata Document" };
+                              options = { operation: "CREATE", dataModel: mappedSchema, uiForm: ui, buttonTitle: "Register Metadata Document" };
 
                               $('form').metadataeditorForm(options, function onSubmitValid(metadata) {
                                 //create a JSON file, which contains the metadata.
