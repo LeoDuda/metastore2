@@ -173,31 +173,29 @@
 
                 //check if metadata is a json file
                 if ((isJson(metadata) === 1)) {
-                  console.log("im json part");
                   options = { operation: "READ", dataModel: schema, uiForm: "*", resource: JSON.parse(metadata) };
                   $('form').metadataeditorForm(options, function onSubmitValid(value) {
                   });
                 }
                 else {
                   try {
-                    console.log("im try xml Zeile 183");
+                    //convert input xml document 
                     var json = convert.xml2json(metadata, { compact: true, spaces: 4 });
-                    console.log(json);
+
+                    //ui schema if given
                     var ui;
 
-
+                    //load the mapping file to get the mapped json schema
                     $.getJSON(mappingPath, function (mapping) {
-                      console.log(mapping);
 
-                      console.log("Zeile 192");
+                      //the mapped ui schema key
                       var uiReference = mapping[schemaId]['u' + version];
-                      console.log(uiReference);
-
+                      //try to load the ui schema if given
                       try {
                         $.getJSON(uiReference, function (uiJson) {
                           console.log(uiJson);
                           if (uiJson == undefined) {
-                            console.log("undefined");
+                            console.log("undefined ui schema");
                             ui = '*';
                           } else {
                             ui = uiJson;
@@ -207,13 +205,13 @@
                         ui = '*'
                       }
 
+                      //the mapped json schema key
                       var schemaReference = mapping[schemaId]['v' + version];
 
+                      //load the mapped json schema
                       $.getJSON(schemaReference, function (mappedSchema) {
                         console.log(ui);
                         console.log(JSON.stringify(mappedSchema, null, 2));
-                        //Achtung, ui für id_1 passt nicht
-
 
                         options = { operation: "READ", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(json) };
                         $('form').metadataeditorForm(options, function onSubmitValid(value) {
@@ -221,8 +219,8 @@
                       });
                     });
                   }
+                  //when the conversion of the xml document failes or there is no mapped json schema, show the xml and xsd as a text
                   catch (e) {
-                    console.log("im catch xml Zeile 204");
                     $.getJSON("/jsonSchemas/xmlDocumentViewerWrapper.json", function (dataModel) {
                       $.getJSON("/jsonSchemas/uiFormXmlDocumentViewerWrapper.json", function (uiForm) {
                         var resource = { metadata: metadata };
@@ -248,13 +246,13 @@
                   readFile(input, function (documentAsText) {
                     readMetadataDocument(options.resource.metadataDocumentUri, function (metadataResource) {
 
-                      console.log(metadataDataModel); //schema als Objekt, xsd oder json
-                      console.log(metadataResource);  //ressource als string
-                      console.log(dataModel);
-                      console.log(rowColumnvalue.schemaVersion);
+                      // console.log(metadataDataModel); //schema als Objekt, ist xsd oder json
+                      // console.log(metadataResource);  //ressource als string
+                      // console.log(dataModel);
+                      // console.log(rowColumnvalue.schemaVersion);
 
+                      //check if the metadata document is a json or xml file
                       if ((isJson(metadataDataModel) === 1)) {
-                        console.log("im json part Zeile 236");
                         var resource = JSON.parse(metadataResource);
 
                         if (documentAsText !== null) {
@@ -283,23 +281,27 @@
                           createMetadataRecord(metadataRecord, metadataDocumentFile);
                         });
                       } else {
+                        //variable for the ui schema
                         var ui;
 
-                        console.log("im xml Zeile 266");
+                        //load the mapping file to get the ui and json schema
                         $.getJSON(mappingPath, function (mapping) {
+
                           console.log(mapping);
                           var version = rowColumnvalue.schemaVersion;
                           console.log(version);
                           console.log(schemaId);
 
+                          //the reference for the ui schema
                           var uiReference = mapping[schemaId]['u' + version];
                           console.log(uiReference);
 
+                          //try to get the ui schema if given
                           try {
                             $.getJSON(uiReference, function (uiJson) {
                               console.log(uiJson);
                               if (uiJson == undefined) {
-                                console.log("undefined");
+                                console.log("undefined ui schema");
                                 ui = '*';
                               } else {
                                 ui = uiJson;
@@ -309,34 +311,35 @@
                             ui = '*'
                           }
 
+                          //the reference of the mapped json schema
                           var schemaReference = mapping[schemaId]['v' + version];
 
+                          //load the mapped json schema
                           $.getJSON(schemaReference, function (mappedSchema) {
+                            //check if the user uploaded a file for the update operation
                             if (documentAsText !== null) {
                               try {
-                                console.log("im try Zeile 278");
+                                //convert the uploaded xml document
                                 var tempJson = convert.xml2json(documentAsText, { compact: true, spaces: 4 });
                                 console.log(tempJson);
                                 options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(tempJson), buttonTitle: "Update" };
 
                               } catch (e) {
+                                //when the conversion of the uploaded xml file failes,use the old registered xml file
                                 var oldJson = convert.xml2json(metadataResource, { compact: true, spaces: 4 });
                                 options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(oldJson), buttonTitle: "Update" };
                               }
                             }
                             else {
                               try {
-                                console.log("im try Zeile 290");
+                                //no uploaded file, so convert the already registered xml file
                                 var oldJson = convert.xml2json(metadataResource, { compact: true, spaces: 4 });
-
 
                                 console.log(oldJson);
                                 options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(oldJson), buttonTitle: "Update" };
 
-
-
                               } catch (e) {
-
+                                //when the conversion failes or there is no mapped json schema, show the xml and xsd as a text
                                 $.getJSON("/jsonSchemas/xmlDocumentViewerWrapper.json", function (dataModel) {
                                   $.getJSON("/jsonSchemas/uiFormXmlDocumentViewerWrapper.json", function (uiForm) {
                                     var resource = { metadata: metadataResource };
@@ -360,15 +363,13 @@
                                     });
                                   });
                                 });
-
                               }
-
                             }
-
 
                             $('form').metadataeditorForm(options, function onSubmitValid(updatedMetadataDocument) {
                               console.log(updatedMetadataDocument);
 
+                              //convert the updated json file back to xml
                               var updatedXML = convert.json2xml(JSON.parse(updatedMetadataDocument), { compact: true, spaces: 4 });
                               console.log(updatedXML);
 
@@ -429,8 +430,9 @@
                       console.log(documentAsText); //ressource als string oder null
                       JSON.stringify(schemaDocument);
 
+                      //check if the document is a json file
                       if ((isJson(schemaDocument) === 1)) {
-                        console.log("im json part");
+
                         JSON.parse(JSON.stringify(schemaDocument));
                         if (documentAsText !== null) {
                           options = { operation: "UPDATE", dataModel: schemaDocument, uiForm: "*", resource: JSON.parse(documentAsText), buttonTitle: "Register Metadata Document" };
@@ -446,16 +448,19 @@
                         });
                       }
                       else {
+                        //variable for the ui schema
                         var ui;
 
-                        console.log("im xml Zeile 403");
+                        //load the mapping file to get the json schema
                         $.getJSON(mappingPath, function (mapping) {
                           console.log(JSON.stringify(mapping, null, 2));
                           var version = record.schemaVersion;
 
+                          //reference of the ui schema
                           var uiReference = mapping[schemaId]['u' + version];
                           console.log(uiReference);
 
+                          //load the ui schema if given
                           try {
                             $.getJSON(uiReference, function (uiJson) {
                               console.log(uiJson);
@@ -470,36 +475,37 @@
                             ui = '*'
                           }
 
+                          //reference of the mapped json schema
                           var schemaReference = mapping[schemaId]['v' + version];
 
+                          //load the mapped json schema
                           $.getJSON(schemaReference, function (mappedSchema) {
+                            //check if the user uploaded a file
                             if (documentAsText !== null) {
                               try {
-                                console.log("im try Zeile 413");
+                                //convert the uploaded xml file
                                 var tempJson = convert.xml2json(documentAsText, { compact: true, spaces: 4 });
                                 console.log(tempJson);
                                 options = { operation: "UPDATE", dataModel: mappedSchema, uiForm: ui, resource: JSON.parse(tempJson), buttonTitle: "Register Metadata Document" };
 
                                 $('form').metadataeditorForm(options, function onSubmitValid(metadata) {
                                   //create a JSON file, which contains the metadata.
-
                                   console.log(metadata);
                                   console.log(JSON.parse(metadata));
 
-
-
+                                  //convert the updated input to a xml
                                   var xml = convert.json2xml(JSON.parse(metadata), { compact: true, spaces: 4 });
 
                                   console.log(xml);
                                   console.log(JSON.parse(metadata).metadata)
 
-                                  //var xmlDocument = JSON.parse(metadata).metadata;
                                   var blobDocument = new Blob([xml]);
                                   const documentFile = new File([blobDocument], 'documentFile.xml');
                                   console.log(metadataRecord);
                                   createMetadataRecord(metadataRecord, documentFile);
                                 });
                               } catch (e) {
+                                //when the conversion failes or there is no mapped schema, show the xml and xsd as a text
                                 $.getJSON("/jsonSchemas/xmlDocumentViewerWrapper.json", function (dataModel) {
                                   $.getJSON("/jsonSchemas/uiFormXmlDocumentViewerWrapper.json", function (uiForm) {
                                     if (documentAsText !== null) {
@@ -518,24 +524,20 @@
                                 });
                               }
                             } else {
-                              //Hier falls xsd aber ohne hochgeladene XML-Ressource
 
-                              console.log("im try Zeile 458");
+                              //when there is no uploaded xml file, continue here
                               console.log(schemaDocument);
-
-
                               console.log(mappedSchema);
 
                               options = { operation: "CREATE", dataModel: mappedSchema, uiForm: ui, buttonTitle: "Register Metadata Document" };
 
                               $('form').metadataeditorForm(options, function onSubmitValid(metadata) {
                                 //create a JSON file, which contains the metadata.
-
                                 console.log(metadata);
                                 console.log(JSON.parse(metadata));
 
+                                //convert the input of the form into a xml file
                                 var xml = convert.json2xml(JSON.parse(metadata), { compact: true, spaces: 4 });
-
                                 console.log(xml);
 
                                 var blobDocument = new Blob([xml]);
@@ -746,18 +748,23 @@
       });
     }
 
+    //function to check if a variable or a string is a json or xml document
     function isJson(object) {
+      //first check if it's a xml file
       try {
         const serializer = new XMLSerializer();
         const xmlStr = serializer.serializeToString(object);
         return 0;
       } catch (e) {
+        //check if the variable is a string
         if (typeof object === "string") {
           var start = object.charAt(0);
+          //check if the string starts with a '{'
           if (start === '{') {
             return 1;
           } else {
             try {
+              //try to parse the variable to a json object
               JSON.parse(object);
               return 1;
             } catch (e) {
