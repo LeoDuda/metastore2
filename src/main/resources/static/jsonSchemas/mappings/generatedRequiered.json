@@ -1,0 +1,31 @@
+{
+    "type": "object",
+    "properties": {
+        "example:metadata": {
+            "type": "object",
+            "properties": {
+                "_attributes": {
+                    "type": "object",
+                    "properties": {
+                        "xmlns:example": {
+                            "type": "string",
+                            "readOnly": true,
+                            "default": "http://www.example.org/schema/xsd/"
+                        }
+                    }
+                },
+                "example:title": {
+                    "type": "object",
+                    "properties": {
+                        "_text": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "required": [
+                "example:title"
+            ]
+        }
+    }
+}

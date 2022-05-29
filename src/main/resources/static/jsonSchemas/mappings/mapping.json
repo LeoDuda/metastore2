@@ -1,15 +1,20 @@
 {
-    "_comment": "This file maps xml schemas to their json schemas",
+    "_comment": "This file maps xml schemas to their json and ui schemas. For mor information please check the instructions",
     "id_2": {
-        "v1": "/jsonSchemas/mappings/kitschema.json"
+        "v1": "/jsonSchemas/mappings/generatedNew.json"
     },
     "id_1": {
         "v1": "/jsonSchemas/mappings/generatedohne.json",
-        "v2": "/jsonSchemas/mappings/generated07.json",
-        "v3": "/jsonSchemas/mappings/examplexsd.json"
+        "v2": "/jsonSchemas/mappings/generatedNew.json"
     },
     "id_3": {
-        "v1": "/jsonSchemas/mappings/exampleSchema.json",
+        "v1": "/jsonSchemas/mappings/generatedNewNew.json"
+    },
+    "id_4": {
+        "v1": "/jsonSchemas/mappings/generatedRequiered.json"
+    },
+    "id_5": {
+        "v1": "/jsonSchemas/mappings/generatedRequiered.json",
         "u1": "/jsonSchemas/mappings/ui.json"
     }
 }

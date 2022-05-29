@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "properties": {
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "_attributes": {
+                    "type": "object",
+                    "properties": {
+                        "xmlns": {
+                            "type": "string",
+                            "readOnly": true,
+                            "default": "http://www.example.org/schema/xsd/"
+                        }
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "title"
+            ]
+        }
+    }
+}
